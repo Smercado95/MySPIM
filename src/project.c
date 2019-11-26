@@ -82,7 +82,33 @@ int ALU_operations(unsigned data1,unsigned data2,unsigned extended_value,unsigne
 /* 10 Points */
 int rw_memory(unsigned ALUresult,unsigned data2,char MemWrite,char MemRead,unsigned *memdata,unsigned *Mem)
 {
+   //If MemWrite = 1, write into memory
+  //If MemRead = 1, read from memory
 
+  //halt if memory is being accessed and if ALUresult is not word aligned
+  if(MemWrite == 1 || MemRead == 1)
+  {
+    if(ALUresult % 4) != 0)
+    {
+      return 1;
+    }
+  }
+
+  //Memread: read the content of the memory location addressed by ALUresult to *memdata
+  //ALUresult shift the address to the RIGHT by 2 to form the index
+  if(MemRead == 1)
+  {
+    *memdata = Mem[ALUresult >> 2];
+  }
+
+  //Memwrite: write the value of data2 to the memory location addressed by ALUresult
+  //ALUresult shift the address to the RIGHT by 2 to form the index
+  if(MemWrite == 1)
+  {
+    Mem[ALUresult >> 2] = data2;
+  }
+
+  return 0;
 }
 
 
@@ -90,13 +116,49 @@ int rw_memory(unsigned ALUresult,unsigned data2,char MemWrite,char MemRead,unsig
 /* 10 Points */
 void write_register(unsigned r2,unsigned r3,unsigned memdata,unsigned ALUresult,char RegWrite,char RegDst,char MemtoReg,unsigned *Reg)
 {
+   //write the data to a regiser addressed by r2 or r3
+  //If RegWrite == 1, and MemtoReg ==1, then data coming from memory
+  //If RegWrite == 1, and MemtoReg ==0, then data coming from ALU_result
 
+  if(RegWrite == 1)
+  {
+    //write memdata to register
+    if(MemtoReg == 1)
+    {
+      if(RegDst == 1)
+      {
+        Reg[r3] = memdata;
+      }
+      else
+      Reg[r2] = memdata;
+    }
+
+    //write ALUresult to register
+    else(MemtoReg == 0)
+    {
+      if(RegDst == 0)
+      {
+        Reg[r2] = ALUresult;
+      }
+      else
+      Reg[r3] = ALUresult;
+    }
+  }
 }
 
 /* PC update */
 /* 10 Points */
 void PC_update(unsigned jsec,unsigned extended_value,char Branch,char Jump,char Zero,unsigned *PC)
 {
+     //Update: PC = PC + 4, increment by 4
+  *PC += 4;
 
+    //Branching: add the extended_value bitshifted by 2
+    if(Zero == 1 && Branch == 1)
+        *PC += extended_value << 2;
+
+    //Jump: Left shift bits of jsec by 2 and use upper 4 bits of PC
+    if(Jump == 1)
+        *PC = (jsec << 2) | (*PC & 0xf0000000);
 }
 
